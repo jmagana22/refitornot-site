@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Loan Ledger</title>
+<meta name="description" content="Refinance your current car loan, or estimate payments on a new purchase. One honest number either way.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+  <header>
+    <div class="eyebrow">Auto Loan Ledger</div>
+    <h1>What will this car actually cost you?</h1>
+    <p class="sub">Refinance the loan you have, or estimate payments on one you're about to take out.</p>
+  </header>
+
+  <div class="mode-toggle" id="modeToggle">
+    <button type="button" class="mode-btn active" data-mode="refi">Refinance my loan</button>
+    <button type="button" class="mode-btn" data-mode="finance">Finance a new car</button>
+  </div>
+
+  <!-- REFINANCE MODE -->
+  <div id="refiInputs">
+    <div class="card">
+      <div class="section-label">Current auto loan</div>
+      <div class="field-grid">
+        <div class="field full">
+          <label for="carBalance">Loan balance</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="carBalance" value="18000" min="0" step="500">
+          </div>
+        </div>
+        <div class="field">
+          <label for="monthsRemaining">Months remaining</label>
+          <div class="input-wrap">
+            <input type="number" id="monthsRemaining" value="36" min="1" max="96" step="1">
+            <span class="suffix">mo</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="carCurrentAPR">Current APR</label>
+          <div class="input-wrap">
+            <input type="number" id="carCurrentAPR" value="9.5" min="0" max="30" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Refinance offer</div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="carNewAPR">New APR offered</label>
+          <div class="input-wrap">
+            <input type="number" id="carNewAPR" value="6.5" min="0" max="30" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="refiFee">Refi fees (if any)</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="refiFee" value="0" min="0" step="10">
+          </div>
+        </div>
+        <div class="field full">
+          <label>New loan term</label>
+          <div class="term-toggle" id="carTermToggle">
+            <button type="button" class="term-btn active" data-term="match">Match remaining (<span id="matchMonthsLabel">36</span> mo)</button>
+            <button type="button" class="term-btn" data-term="custom">Custom term</button>
+          </div>
+        </div>
+        <div class="field full" id="customTermField" style="display:none">
+          <label for="customTermMonths">New term</label>
+          <div class="input-wrap">
+            <input type="number" id="customTermMonths" value="60" min="12" max="96" step="6">
+            <span class="suffix">mo</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" id="refiCalcBtn">Calculate</button>
+      <p class="assumption">Most auto refis charge little or no fee &mdash; leave it at $0 unless your lender quotes one. Extending the term lowers the payment but can raise total interest; the note below flags it either way.</p>
+    </div>
+  </div>
+
+  <!-- FINANCE MODE -->
+  <div id="financeInputs" style="display:none">
+    <div class="card">
+      <div class="section-label">Vehicle &amp; trade</div>
+      <div class="field-grid">
+        <div class="field full">
+          <label for="vehiclePrice">Vehicle price</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="vehiclePrice" value="35000" min="0" step="500">
+          </div>
+        </div>
+        <div class="field">
+          <label for="downPayment">Down payment</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="downPayment" value="3000" min="0" step="500">
+          </div>
+        </div>
+        <div class="field">
+          <label for="tradeIn">Trade-in value</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="tradeIn" value="0" min="0" step="500">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Loan terms</div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="financeAPR">APR offered</label>
+          <div class="input-wrap">
+            <input type="number" id="financeAPR" value="7.5" min="0" max="30" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="salesTax">Sales tax rate</label>
+          <div class="input-wrap">
+            <input type="number" id="salesTax" value="7.0" min="0" max="15" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field full">
+          <label for="financeTerm">Loan term</label>
+          <div class="input-wrap">
+            <input type="number" id="financeTerm" value="60" min="12" max="96" step="1">
+            <span class="suffix">mo</span>
+          </div>
+          <div class="chip-row" id="termChips">
+            <button type="button" class="chip" data-months="36">36 mo</button>
+            <button type="button" class="chip" data-months="48">48 mo</button>
+            <button type="button" class="chip active" data-months="60">60 mo</button>
+            <button type="button" class="chip" data-months="72">72 mo</button>
+            <button type="button" class="chip" data-months="84">84 mo</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" id="financeCalcBtn">Calculate</button>
+      <p class="assumption">Assumes sales tax applies to the price minus your trade-in value and gets rolled into the loan &mdash; the common method, but rules vary by state. Confirm with your dealer or DMV.</p>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-title" id="verdictTitle"></div>
+    <p class="verdict-sub" id="verdictSub"></p>
+    <div class="term-note" id="termNote"></div>
+
+    <div class="chart-wrap" id="chartWrap">
+      <svg id="chart" viewBox="0 0 520 220" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-legend">
+        <span><i class="swatch" style="background:var(--ochre)"></i>Refi fee (one-time)</span>
+        <span><i class="swatch" style="background:var(--green)"></i>Cumulative savings</span>
+      </div>
+    </div>
+
+    <div class="bar-wrap" id="barWrap">
+      <div class="cost-bar" id="costBar"></div>
+      <div class="cost-bar-legend">
+        <span><i class="swatch" style="background:var(--green)"></i> Principal</span>
+        <span><i class="swatch" style="background:var(--ochre)"></i> Interest</span>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice. Actual rates, fees, and taxes vary by lender and state &mdash; confirm exact numbers before signing. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  let mode = 'refi';
+  let refiTerm = 'match';
+
+  function monthlyPayment(principal, aprPct, years){
+    const n = years * 12;
+    const r = (aprPct / 100) / 12;
+    if (r === 0) return principal / n;
+    return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  // ---------- REFI MODE ----------
+  function calcRefi(){
+    const balance = parseFloat($('carBalance').value) || 0;
+    const monthsRemaining = parseFloat($('monthsRemaining').value) || 1;
+    const currentAPR = parseFloat($('carCurrentAPR').value) || 0;
+    const newAPR = parseFloat($('carNewAPR').value) || 0;
+    const fee = parseFloat($('refiFee').value) || 0;
+
+    const newTermMonths = refiTerm === 'match' ? monthsRemaining : (parseFloat($('customTermMonths').value) || monthsRemaining);
+
+    const oldPayment = monthlyPayment(balance, currentAPR, monthsRemaining / 12);
+    const newPayment = monthlyPayment(balance, newAPR, newTermMonths / 12);
+    const monthlySavings = oldPayment - newPayment;
+
+    const totalInterestCurrent = (oldPayment * monthsRemaining) - balance;
+    const totalInterestNew = (newPayment * newTermMonths) - balance;
+    const interestDelta = totalInterestNew - totalInterestCurrent;
+    const termChanged = newTermMonths !== monthsRemaining;
+
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const termNoteEl = $('termNote');
+    const statGrid = $('statGrid');
+
+    $('chartWrap').classList.add('show');
+    $('barWrap').classList.remove('show');
+
+    if (monthlySavings <= 0){
+      titleEl.textContent = 'Skip it.';
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = "Your new rate over this term doesn't lower the payment. Refinancing here costs you money with no recovery point.";
+      termNoteEl.className = 'term-note';
+      renderChart(null, fee, newTermMonths);
+      statGrid.innerHTML =
+        statRow('Current payment', fmt(oldPayment)) +
+        statRow('New payment', fmt(newPayment)) +
+        statRow('Monthly change', fmt(monthlySavings), 'neg') +
+        statRow('Breakeven', '\u2014') +
+        statRow('Current term left', monthsRemaining + ' mo') +
+        statRow('New loan term', newTermMonths + ' mo') +
+        statRow('Total interest, life of loan', fmt(totalInterestCurrent) + ' \u2192 ' + fmt(totalInterestNew), interestDelta > 0 ? 'neg' : 'pos', true);
+      return;
+    }
+
+    const breakevenMonths = fee > 0 ? fee / monthlySavings : 0;
+
+    let title, cls, sub;
+    if (breakevenMonths <= 3){
+      title = fee <= 0 ? 'Refinance. The savings start immediately.' : 'Refinance. It pays for itself almost immediately.';
+      cls = 'good';
+      sub = 'There\u2019s little to no cost to recover. Lower payment starts essentially right away.';
+    } else if (breakevenMonths <= 9){
+      title = "Refinance — as long as you'll keep the loan a while.";
+      cls = 'caution';
+      sub = 'The fee takes a few months to recover. Worth it unless you plan to pay off or trade in the car very soon.';
+    } else {
+      title = 'Probably not worth the paperwork.';
+      cls = 'caution';
+      sub = 'The fee takes a long time to recover relative to a typical car loan. The savings are real but slow to materialize.';
+    }
+
+    titleEl.textContent = title;
+    titleEl.className = 'verdict-title ' + cls;
+    subEl.textContent = sub;
+
+    if (termChanged){
+      termNoteEl.classList.add('show');
+      if (interestDelta > 0){
+        termNoteEl.className = 'term-note show caution';
+        termNoteEl.textContent = 'Stretching to a ' + newTermMonths + '-month term adds about ' + fmt(interestDelta) + ' in total interest, even at the lower rate \u2014 you\u2019re financing the balance over more months.';
+      } else {
+        termNoteEl.className = 'term-note show good';
+        termNoteEl.textContent = 'Even with the new term length, total interest comes in about ' + fmt(Math.abs(interestDelta)) + ' lower than your current path.';
+      }
+    } else {
+      termNoteEl.className = 'term-note';
+    }
+
+    renderChart(breakevenMonths, fee, newTermMonths, monthlySavings);
+
+    statGrid.innerHTML =
+      statRow('Current payment', fmt(oldPayment)) +
+      statRow('New payment', fmt(newPayment)) +
+      statRow('Monthly savings', fmt(monthlySavings), 'pos') +
+      statRow('Breakeven', fee <= 0 ? 'Immediate' : Math.ceil(breakevenMonths) + ' mo') +
+      statRow('Current term left', monthsRemaining + ' mo') +
+      statRow('New loan term', newTermMonths + ' mo') +
+      statRow('Total interest, life of loan', fmt(totalInterestCurrent) + ' \u2192 ' + fmt(totalInterestNew), interestDelta > 0 ? 'neg' : 'pos', true);
+  }
+
+  function renderChart(breakevenMonths, fee, totalMonths, monthlySavings){
+    const svg = $('chart');
+    const W = 520, H = 220, padL = 60, padR = 20, padT = 20, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    const maxX = totalMonths;
+    const maxSavings = monthlySavings ? monthlySavings * totalMonths : 0;
+    const maxY = Math.max(fee, maxSavings) * 1.15 || 1;
+
+    const xScale = m => padL + (m / maxX) * plotW;
+    const yScale = v => padT + plotH - (v / maxY) * plotH;
+
+    let c = '';
+    c += '<line x1="' + padL + '" y1="' + (padT + plotH) + '" x2="' + (padL + plotW) + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+    c += '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+
+    [0, Math.round(totalMonths/2), totalMonths].forEach(m => {
+      c += '<text x="' + xScale(m) + '" y="' + (padT + plotH + 18) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="middle">' + m + 'mo</text>';
+    });
+    c += '<text x="' + (padL - 8) + '" y="' + (padT + plotH + 4) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">$0</text>';
+    c += '<text x="' + (padL - 8) + '" y="' + (padT + 10) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">' + fmt(maxY) + '</text>';
+
+    const yFee = yScale(fee);
+    c += '<line x1="' + padL + '" y1="' + yFee + '" x2="' + (padL + plotW) + '" y2="' + yFee + '" stroke="#B9822E" stroke-width="2.5" stroke-dasharray="6 5"/>';
+
+    if (monthlySavings){
+      const x2 = xScale(totalMonths);
+      const y2 = yScale(monthlySavings * totalMonths);
+      c += '<line x1="' + padL + '" y1="' + (padT+plotH) + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#1F6F54" stroke-width="2.5"/>';
+
+      if (breakevenMonths !== null && breakevenMonths <= totalMonths){
+        const bx = xScale(breakevenMonths);
+        const by = yScale(fee);
+        c += '<circle cx="' + bx + '" cy="' + by + '" r="5" fill="#16242F"/>';
+        c += '<line x1="' + bx + '" y1="' + by + '" x2="' + bx + '" y2="' + (padT+plotH) + '" stroke="#16242F" stroke-width="1" stroke-dasharray="3 3"/>';
+        c += '<text x="' + bx + '" y="' + (by - 10) + '" font-family="Archivo, sans-serif" font-weight="700" font-size="11" fill="#16242F" text-anchor="middle">' + (fee <= 0 ? 'Immediate' : 'Month ' + Math.ceil(breakevenMonths)) + '</text>';
+      }
+    }
+
+    svg.innerHTML = c;
+  }
+
+  // ---------- FINANCE MODE ----------
+  function calcFinance(){
+    const price = parseFloat($('vehiclePrice').value) || 0;
+    const down = parseFloat($('downPayment').value) || 0;
+    const tradeIn = parseFloat($('tradeIn').value) || 0;
+    const taxRate = parseFloat($('salesTax').value) || 0;
+    const apr = parseFloat($('financeAPR').value) || 0;
+    const term = parseFloat($('financeTerm').value) || 1;
+
+    const taxableAmount = Math.max(price - tradeIn, 0);
+    const salesTax = taxableAmount * (taxRate / 100);
+    const amountFinanced = Math.max(price - down - tradeIn + salesTax, 0);
+
+    const payment = monthlyPayment(amountFinanced, apr, term / 12);
+    const totalPaid = payment * term;
+    const totalInterest = totalPaid - amountFinanced;
+    const interestPct = price > 0 ? (totalInterest / price) * 100 : 0;
+
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const termNoteEl = $('termNote');
+    const statGrid = $('statGrid');
+
+    termNoteEl.className = 'term-note';
+    $('chartWrap').classList.remove('show');
+    $('barWrap').classList.add('show');
+
+    let title, cls;
+    if (interestPct < 10){
+      title = 'Interest adds relatively little here.';
+      cls = 'good';
+    } else if (interestPct < 20){
+      title = 'Interest adds a real amount — worth shopping the rate.';
+      cls = 'caution';
+    } else {
+      title = 'Interest is adding a lot on top of the price.';
+      cls = 'bad';
+    }
+
+    titleEl.textContent = title;
+    titleEl.className = 'verdict-title ' + cls;
+    subEl.textContent = 'Over ' + term + ' months at ' + apr + '% APR, you\u2019ll pay about ' + fmt(totalInterest) + ' in interest \u2014 roughly ' + Math.round(interestPct) + '% on top of the vehicle price.';
+
+    renderCostBar(amountFinanced, totalInterest);
+
+    statGrid.innerHTML =
+      statRow('Monthly payment', fmt(payment)) +
+      statRow('Amount financed', fmt(amountFinanced)) +
+      statRow('Sales tax', fmt(salesTax)) +
+      statRow('Down payment', fmt(down)) +
+      statRow('Total interest', fmt(totalInterest), 'neg') +
+      statRow('Total cost of loan', fmt(totalPaid), null, false);
+  }
+
+  function renderCostBar(principal, interest){
+    const total = principal + interest;
+    const bar = $('costBar');
+    if (total <= 0){ bar.innerHTML = ''; return; }
+    const pPct = (principal / total) * 100;
+    const iPct = 100 - pPct;
+    bar.innerHTML =
+      '<div class="cost-bar-seg principal" style="width:' + pPct + '%">' + (pPct > 18 ? Math.round(pPct) + '%' : '') + '</div>' +
+      '<div class="cost-bar-seg interest" style="width:' + iPct + '%">' + (iPct > 18 ? Math.round(iPct) + '%' : '') + '</div>';
+  }
+
+  // ---------- MODE SWITCHING ----------
+  function setMode(newMode){
+    mode = newMode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    $('refiInputs').style.display = mode === 'refi' ? '' : 'none';
+    $('financeInputs').style.display = mode === 'finance' ? '' : 'none';
+    $('resultCard').classList.add('show');
+    calculate();
+  }
+
+  function calculate(){
+    if (mode === 'refi') calcRefi(); else calcFinance();
+  }
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
+  });
+
+  document.querySelectorAll('#carTermToggle .term-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#carTermToggle .term-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      refiTerm = btn.dataset.term;
+      $('customTermField').style.display = refiTerm === 'custom' ? '' : 'none';
+      calculate();
+    });
+  });
+
+  $('monthsRemaining').addEventListener('input', () => {
+    $('matchMonthsLabel').textContent = $('monthsRemaining').value || '0';
+    if (mode === 'refi') calculate();
+  });
+
+  document.querySelectorAll('#termChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#termChips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      $('financeTerm').value = chip.dataset.months;
+      calculate();
+    });
+  });
+
+  $('financeTerm').addEventListener('input', () => {
+    const val = $('financeTerm').value;
+    document.querySelectorAll('#termChips .chip').forEach(c => c.classList.toggle('active', c.dataset.months === val));
+  });
+
+  $('refiCalcBtn').addEventListener('click', calculate);
+  $('financeCalcBtn').addEventListener('click', calculate);
+
+  setMode('refi');
+})();
+</script>
+</body>
+</html>

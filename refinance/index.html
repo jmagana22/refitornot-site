@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should I Refinance?</title>
+<meta name="description" content="Compare your current mortgage against a fresh refinance offer. One breakeven month, one honest look at total interest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+  <header>
+    <div class="eyebrow">Refinance Ledger</div>
+    <h1>Should I refinance?</h1>
+    <p class="sub">Your current mortgage against a fresh refinance offer. One breakeven month, and an honest look at total interest.</p>
+  </header>
+
+  <div class="card">
+    <div class="section-label">Current mortgage</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="balance">Loan balance</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="balance" value="300000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="yearsLeft">Years remaining</label>
+        <div class="input-wrap">
+          <input type="number" id="yearsLeft" value="25" min="1" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="currentRate">Current rate</label>
+        <div class="input-wrap">
+          <input type="number" id="currentRate" value="6.5" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Refinance offer</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="newRate">New rate offered</label>
+        <div class="input-wrap">
+          <input type="number" id="newRate" value="5.5" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="closingCosts">Closing costs</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="closingCosts" value="5000" min="0" step="100">
+        </div>
+      </div>
+      <div class="field full">
+        <label>New loan term</label>
+        <div class="term-toggle" id="termToggle">
+          <button type="button" class="term-btn active" data-term="30">Fresh 30-year</button>
+          <button type="button" class="term-btn" data-term="match">Match remaining (<span id="matchYearsLabel">25</span> yrs)</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate</button>
+    <p class="assumption">Defaults to a fresh 30-year term &mdash; what most refinances actually reset you to. Switch to "Match remaining term" to isolate just the rate change.</p>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-row">
+      <div class="verdict-title" id="verdictTitle"></div>
+    </div>
+    <p class="verdict-sub" id="verdictSub"></p>
+    <div class="term-note" id="termNote"></div>
+
+    <div class="chart-wrap" id="chartWrap">
+      <svg id="chart" viewBox="0 0 520 220" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-legend">
+        <span><i class="swatch" style="background:var(--ochre)"></i>Closing costs (one-time)</span>
+        <span><i class="swatch" style="background:var(--green)"></i>Cumulative savings</span>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice. Rates, taxes, and lender fees vary &mdash; confirm exact numbers with your lender before deciding. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  let selectedTerm = '30';
+
+  function monthlyPayment(principal, annualRatePct, years){
+    const n = years * 12;
+    const r = (annualRatePct / 100) / 12;
+    if (r === 0) return principal / n;
+    return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  function calculate(){
+    const balance = parseFloat($('balance').value) || 0;
+    const yearsLeft = parseFloat($('yearsLeft').value) || 1;
+    const currentRate = parseFloat($('currentRate').value) || 0;
+    const newRate = parseFloat($('newRate').value) || 0;
+    const closingCosts = parseFloat($('closingCosts').value) || 0;
+
+    const newTermYears = selectedTerm === '30' ? 30 : yearsLeft;
+    const oldTermMonths = yearsLeft * 12;
+    const newTermMonths = newTermYears * 12;
+
+    const oldPayment = monthlyPayment(balance, currentRate, yearsLeft);
+    const newPayment = monthlyPayment(balance, newRate, newTermYears);
+    const monthlySavings = oldPayment - newPayment;
+
+    const totalInterestCurrent = (oldPayment * oldTermMonths) - balance;
+    const totalInterestNew = (newPayment * newTermMonths) - balance;
+    const interestDelta = totalInterestNew - totalInterestCurrent;
+    const termChanged = newTermYears !== yearsLeft;
+
+    const resultCard = $('resultCard');
+    resultCard.classList.add('show');
+    $('chartWrap').classList.add('show');
+
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const statGrid = $('statGrid');
+    const termNoteEl = $('termNote');
+
+    if (monthlySavings <= 0){
+      titleEl.textContent = 'Skip it.';
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = "Your new rate over this term doesn't lower the payment at all. Refinancing here costs you money with no recovery point.";
+      termNoteEl.className = 'term-note';
+      renderChart(null, closingCosts, newTermMonths);
+      statGrid.innerHTML =
+        statRow('Current payment', fmt(oldPayment)) +
+        statRow('New payment', fmt(newPayment)) +
+        statRow('Monthly change', fmt(monthlySavings), 'neg') +
+        statRow('Breakeven', '—') +
+        statRow('Current term left', yearsLeft + ' yrs') +
+        statRow('New loan term', newTermYears + ' yrs') +
+        statRow('Total interest, life of loan', fmt(totalInterestCurrent) + ' \u2192 ' + fmt(totalInterestNew), interestDelta > 0 ? 'neg' : 'pos', true);
+      return;
+    }
+
+    const breakevenMonths = closingCosts / monthlySavings;
+
+    let title, cls, sub;
+    if (breakevenMonths <= 24){
+      title = 'Refinance. It pays for itself fast.';
+      cls = 'good';
+      sub = 'You recoup the closing costs in under two years. Everything after that month is lower monthly cash flow for as long as you keep the loan.';
+    } else if (breakevenMonths <= 48){
+      title = "Refinance — if you're staying put.";
+      cls = 'caution';
+      sub = 'The breakeven point is real but not immediate. This only pays off if you plan to stay in the home (or keep the loan) past that point.';
+    } else {
+      title = 'Probably not worth it.';
+      cls = 'caution';
+      sub = "The savings are real, but it takes years to recover the closing costs. Unless you're certain you'll hold the loan that long, the math is shaky.";
+    }
+
+    titleEl.textContent = title;
+    titleEl.className = 'verdict-title ' + cls;
+    subEl.textContent = sub;
+
+    if (termChanged){
+      termNoteEl.classList.add('show');
+      if (interestDelta > 0){
+        termNoteEl.className = 'term-note show caution';
+        termNoteEl.textContent = 'Resetting to a ' + newTermYears + '-year term adds about ' + fmt(interestDelta) + ' in total interest over the life of the loan, even at the lower rate — because you\u2019re financing the balance over more years.';
+      } else {
+        termNoteEl.className = 'term-note show good';
+        termNoteEl.textContent = 'Even after resetting the term, total interest over the life of the loan comes in about ' + fmt(Math.abs(interestDelta)) + ' lower than your current path.';
+      }
+    } else {
+      termNoteEl.className = 'term-note';
+    }
+
+    renderChart(breakevenMonths, closingCosts, newTermMonths, monthlySavings);
+
+    statGrid.innerHTML =
+      statRow('Current payment', fmt(oldPayment)) +
+      statRow('New payment', fmt(newPayment)) +
+      statRow('Monthly savings', fmt(monthlySavings), 'pos') +
+      statRow('Breakeven month', Math.ceil(breakevenMonths) + ' mo') +
+      statRow('Current term left', yearsLeft + ' yrs') +
+      statRow('New loan term', newTermYears + ' yrs') +
+      statRow('Total interest, life of loan', fmt(totalInterestCurrent) + ' \u2192 ' + fmt(totalInterestNew), interestDelta > 0 ? 'neg' : 'pos', true);
+
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderChart(breakevenMonths, closingCosts, totalMonths, monthlySavings){
+    const svg = $('chart');
+    const W = 520, H = 220, padL = 60, padR = 20, padT = 20, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    const maxX = totalMonths;
+    const maxSavings = monthlySavings ? monthlySavings * totalMonths : 0;
+    const maxY = Math.max(closingCosts, maxSavings) * 1.15 || closingCosts * 1.2 || 1;
+
+    const xScale = m => padL + (m / maxX) * plotW;
+    const yScale = v => padT + plotH - (v / maxY) * plotH;
+
+    let svgContent = '';
+
+    svgContent += '<line x1="' + padL + '" y1="' + (padT + plotH) + '" x2="' + (padL + plotW) + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+    svgContent += '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+
+    [0, Math.round(totalMonths/2), totalMonths].forEach(m => {
+      svgContent += '<text x="' + xScale(m) + '" y="' + (padT + plotH + 18) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="middle">' + m + 'mo</text>';
+    });
+    svgContent += '<text x="' + (padL - 8) + '" y="' + (padT + plotH + 4) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">$0</text>';
+    svgContent += '<text x="' + (padL - 8) + '" y="' + (padT + 10) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">' + fmt(maxY) + '</text>';
+
+    const yCost = yScale(closingCosts);
+    svgContent += '<line x1="' + padL + '" y1="' + yCost + '" x2="' + (padL + plotW) + '" y2="' + yCost + '" stroke="#B9822E" stroke-width="2.5" stroke-dasharray="6 5"/>';
+
+    if (monthlySavings){
+      const x2 = xScale(totalMonths);
+      const y2 = yScale(monthlySavings * totalMonths);
+      svgContent += '<line x1="' + padL + '" y1="' + (padT+plotH) + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#1F6F54" stroke-width="2.5"/>';
+
+      if (breakevenMonths && breakevenMonths <= totalMonths){
+        const bx = xScale(breakevenMonths);
+        const by = yScale(closingCosts);
+        svgContent += '<circle cx="' + bx + '" cy="' + by + '" r="5" fill="#16242F"/>';
+        svgContent += '<line x1="' + bx + '" y1="' + by + '" x2="' + bx + '" y2="' + (padT+plotH) + '" stroke="#16242F" stroke-width="1" stroke-dasharray="3 3"/>';
+        svgContent += '<text x="' + bx + '" y="' + (by - 10) + '" font-family="Archivo, sans-serif" font-weight="700" font-size="11" fill="#16242F" text-anchor="middle">Month ' + Math.ceil(breakevenMonths) + '</text>';
+      }
+    }
+
+    svg.innerHTML = svgContent;
+  }
+
+  document.querySelectorAll('.term-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.term-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTerm = btn.dataset.term;
+      calculate();
+    });
+  });
+
+  $('yearsLeft').addEventListener('input', () => {
+    $('matchYearsLabel').textContent = $('yearsLeft').value || '0';
+  });
+
+  $('calcBtn').addEventListener('click', calculate);
+  calculate();
+})();
+</script>
+</body>
+</html>

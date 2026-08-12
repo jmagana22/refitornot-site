@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should I Pay Points?</title>
+<meta name="description" content="Weigh the upfront cost of buying down your mortgage rate against what it actually saves you — and whether you'll keep the loan long enough for it to matter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Points Ledger</div>
+    <h1>Should I pay points?</h1>
+    <p class="sub">Buying down your rate costs money today. This finds the exact month it pays for itself — and checks that against how long you'll actually keep the loan.</p>
+  </header>
+
+  <div class="card">
+    <div class="section-label">Your loan</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="loanAmount">Loan amount</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="loanAmount" value="300000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="loanTerm">Loan term</label>
+        <div class="input-wrap">
+          <input type="number" id="loanTerm" value="30" min="1" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="baseRate">Rate without points</label>
+        <div class="input-wrap">
+          <input type="number" id="baseRate" value="6.75" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">The buydown offer</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="pointsPaid">Points you'd pay</label>
+        <div class="input-wrap">
+          <input type="number" id="pointsPaid" value="1.5" min="0" max="10" step="0.125">
+        </div>
+      </div>
+      <div class="field">
+        <label for="reducedRate">Rate with those points</label>
+        <div class="input-wrap">
+          <input type="number" id="reducedRate" value="6.25" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="stayYears">You'll likely keep this loan</label>
+        <div class="input-wrap">
+          <input type="number" id="stayYears" value="7" min="1" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate</button>
+    <p class="assumption">1 point = 1% of the loan amount, paid upfront at closing. "How long you'll keep this loan" drives the verdict &mdash; the U.S. average tenure before moving or refinancing is often cited around 7&ndash;8 years, but use your own honest guess.</p>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-title" id="verdictTitle"></div>
+    <p class="verdict-sub" id="verdictSub"></p>
+
+    <div class="chart-wrap show" id="chartWrap">
+      <svg id="chart" viewBox="0 0 520 220" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-legend">
+        <span><i class="swatch" style="background:var(--ochre)"></i>Points cost (one-time)</span>
+        <span><i class="swatch" style="background:var(--green)"></i>Cumulative savings</span>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice. Actual points pricing and rate offers vary by lender &mdash; confirm exact numbers before locking a rate. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  function monthlyPayment(principal, aprPct, years){
+    const n = years * 12;
+    const r = (aprPct / 100) / 12;
+    if (r === 0) return principal / n;
+    return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  function calculate(){
+    const loanAmount = parseFloat($('loanAmount').value) || 0;
+    const loanTerm = parseFloat($('loanTerm').value) || 1;
+    const baseRate = parseFloat($('baseRate').value) || 0;
+    const pointsPaid = parseFloat($('pointsPaid').value) || 0;
+    const reducedRate = parseFloat($('reducedRate').value) || 0;
+    const stayYears = parseFloat($('stayYears').value) || 1;
+
+    const pointsCost = loanAmount * (pointsPaid / 100);
+    const paymentWithout = monthlyPayment(loanAmount, baseRate, loanTerm);
+    const paymentWith = monthlyPayment(loanAmount, reducedRate, loanTerm);
+    const monthlySavings = paymentWithout - paymentWith;
+    const stayMonths = stayYears * 12;
+
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const statGrid = $('statGrid');
+
+    if (monthlySavings <= 0 || pointsCost <= 0){
+      titleEl.textContent = 'Skip the points.';
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = pointsCost <= 0
+        ? "You haven't entered a points cost, so there's nothing to break even on."
+        : "This rate reduction doesn't actually lower your payment. Paying for it gets you nothing.";
+      renderChart(null, pointsCost, stayMonths);
+      statGrid.innerHTML =
+        statRow('Payment without points', fmt(paymentWithout)) +
+        statRow('Payment with points', fmt(paymentWith)) +
+        statRow('Monthly savings', fmt(monthlySavings), monthlySavings >= 0 ? 'pos' : 'neg') +
+        statRow('Points cost', fmt(pointsCost)) +
+        statRow('Breakeven', '\u2014') +
+        statRow('Your planned stay', stayMonths + ' mo');
+      return;
+    }
+
+    const breakevenMonths = pointsCost / monthlySavings;
+    const ratio = breakevenMonths / stayMonths;
+
+    let title, cls, sub;
+    if (ratio <= 0.5){
+      title = 'Pay the points.';
+      cls = 'good';
+      sub = 'You break even with plenty of room to spare before your planned timeline &mdash; the points are very likely worth it.';
+    } else if (ratio <= 1.0){
+      title = "Pay the points — if you're confident in your timeline.";
+      cls = 'caution';
+      sub = "You break even before you'd move or refinance, but the margin is tight. If your stay ends up shorter than planned, this flips against you.";
+    } else {
+      title = 'Skip the points.';
+      cls = 'bad';
+      sub = "Based on how long you said you'll keep this loan, you won't break even in time. The savings are real, they just arrive too late.";
+    }
+
+    titleEl.textContent = title;
+    titleEl.className = 'verdict-title ' + cls;
+    subEl.textContent = sub;
+
+    renderChart(breakevenMonths, pointsCost, stayMonths, monthlySavings);
+
+    statGrid.innerHTML =
+      statRow('Payment without points', fmt(paymentWithout)) +
+      statRow('Payment with points', fmt(paymentWith)) +
+      statRow('Monthly savings', fmt(monthlySavings), 'pos') +
+      statRow('Points cost', fmt(pointsCost)) +
+      statRow('Breakeven month', Math.ceil(breakevenMonths) + ' mo') +
+      statRow('Your planned stay', stayMonths + ' mo');
+  }
+
+  function renderChart(breakevenMonths, pointsCost, totalMonths, monthlySavings){
+    const svg = $('chart');
+    const W = 520, H = 220, padL = 60, padR = 20, padT = 20, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    const maxX = totalMonths;
+    const maxSavings = monthlySavings ? monthlySavings * totalMonths : 0;
+    const maxY = Math.max(pointsCost, maxSavings) * 1.15 || 1;
+
+    const xScale = m => padL + (m / maxX) * plotW;
+    const yScale = v => padT + plotH - (v / maxY) * plotH;
+
+    let c = '';
+    c += '<line x1="' + padL + '" y1="' + (padT + plotH) + '" x2="' + (padL + plotW) + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+    c += '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+
+    [0, Math.round(totalMonths/2), totalMonths].forEach(m => {
+      c += '<text x="' + xScale(m) + '" y="' + (padT + plotH + 18) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="middle">' + m + 'mo</text>';
+    });
+    c += '<text x="' + (padL - 8) + '" y="' + (padT + plotH + 4) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">$0</text>';
+    c += '<text x="' + (padL - 8) + '" y="' + (padT + 10) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">' + fmt(maxY) + '</text>';
+
+    const yCost = yScale(pointsCost);
+    c += '<line x1="' + padL + '" y1="' + yCost + '" x2="' + (padL + plotW) + '" y2="' + yCost + '" stroke="#B9822E" stroke-width="2.5" stroke-dasharray="6 5"/>';
+
+    if (monthlySavings){
+      const x2 = xScale(totalMonths);
+      const y2 = yScale(monthlySavings * totalMonths);
+      c += '<line x1="' + padL + '" y1="' + (padT+plotH) + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#1F6F54" stroke-width="2.5"/>';
+
+      if (breakevenMonths !== null && breakevenMonths <= totalMonths){
+        const bx = xScale(breakevenMonths);
+        const by = yScale(pointsCost);
+        c += '<circle cx="' + bx + '" cy="' + by + '" r="5" fill="#16242F"/>';
+        c += '<line x1="' + bx + '" y1="' + by + '" x2="' + bx + '" y2="' + (padT+plotH) + '" stroke="#16242F" stroke-width="1" stroke-dasharray="3 3"/>';
+        c += '<text x="' + bx + '" y="' + (by - 10) + '" font-family="Archivo, sans-serif" font-weight="700" font-size="11" fill="#16242F" text-anchor="middle">Month ' + Math.ceil(breakevenMonths) + '</text>';
+      }
+    }
+
+    svg.innerHTML = c;
+  }
+
+  $('calcBtn').addEventListener('click', calculate);
+  $('resultCard').classList.add('show');
+  calculate();
+})();
+</script>
+</body>
+</html>

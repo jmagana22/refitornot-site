@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Much House Can I Afford?</title>
+<meta name="description" content="Work backward from income, debts, and down payment to a realistic home price — taxes and insurance included, not glossed over.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Affordability Ledger</div>
+    <h1>How much house can I afford?</h1>
+    <p class="sub">Works backward from your income, debts, and down payment &mdash; with property tax and insurance actually factored into the price, not bolted on after.</p>
+  </header>
+
+  <div class="card">
+    <div class="section-label">Income &amp; debts</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="grossIncome">Gross monthly income</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="grossIncome" value="8000" min="0" step="100">
+        </div>
+      </div>
+      <div class="field">
+        <label for="monthlyDebts">Other monthly debts</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="monthlyDebts" value="400" min="0" step="50">
+        </div>
+      </div>
+      <div class="field">
+        <label for="maxDTI">Max debt-to-income</label>
+        <div class="input-wrap">
+          <input type="number" id="maxDTI" value="36" min="10" max="55" step="1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Loan assumptions</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="downPayment">Down payment available</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="downPayment" value="60000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="interestRate">Interest rate</label>
+        <div class="input-wrap">
+          <input type="number" id="interestRate" value="6.5" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="loanTermYears">Loan term</label>
+        <div class="input-wrap">
+          <input type="number" id="loanTermYears" value="30" min="1" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="taxRate">Property tax rate</label>
+        <div class="input-wrap">
+          <input type="number" id="taxRate" value="1.1" min="0" max="5" step="0.05">
+          <span class="suffix">%/yr</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="insuranceMonthly">Homeowners insurance</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="insuranceMonthly" value="125" min="0" step="10">
+        </div>
+      </div>
+      <div class="field full">
+        <label for="hoaMonthly">HOA dues (if any)</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="hoaMonthly" value="0" min="0" step="10">
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate</button>
+    <p class="assumption">36% back-end DTI is a common conventional guideline &mdash; some lenders and loan types (FHA, for instance) allow more. Property tax rate defaults to a rough U.S. average; check your county's actual rate for a tighter number.</p>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-title good" id="verdictTitle"></div>
+    <p class="verdict-sub" id="verdictSub"></p>
+    <div class="term-note" id="termNote"></div>
+
+    <div class="bar-wrap show" id="barWrap">
+      <div class="cost-bar" id="costBar"></div>
+      <div class="cost-bar-legend" id="costBarLegend"></div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice or a loan pre-approval. Actual qualification depends on your lender, loan type, credit, and full financial picture. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  function paymentFactor(aprPct, years){
+    const n = years * 12;
+    const r = (aprPct / 100) / 12;
+    if (r === 0) return 1 / n;
+    return r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  function calculate(){
+    const grossIncome = parseFloat($('grossIncome').value) || 0;
+    const monthlyDebts = parseFloat($('monthlyDebts').value) || 0;
+    const maxDTI = parseFloat($('maxDTI').value) || 0;
+    const downPayment = parseFloat($('downPayment').value) || 0;
+    const rate = parseFloat($('interestRate').value) || 0;
+    const termYears = parseFloat($('loanTermYears').value) || 1;
+    const taxRatePct = parseFloat($('taxRate').value) || 0;
+    const insuranceMonthly = parseFloat($('insuranceMonthly').value) || 0;
+    const hoaMonthly = parseFloat($('hoaMonthly').value) || 0;
+
+    const k = paymentFactor(rate, termYears);
+    const t = (taxRatePct / 100) / 12;
+
+    const maxHousingBudget = (grossIncome * (maxDTI / 100)) - monthlyDebts;
+
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const termNoteEl = $('termNote');
+    const statGrid = $('statGrid');
+
+    if (maxHousingBudget <= insuranceMonthly + hoaMonthly){
+      titleEl.textContent = "Your debts leave no room for a house payment.";
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = 'At this DTI limit, your existing monthly debts alone use up the housing budget. Raising the DTI ceiling, paying down debt, or increasing income all move this number.';
+      termNoteEl.className = 'term-note';
+      $('costBar').innerHTML = '';
+      $('costBarLegend').innerHTML = '';
+      statGrid.innerHTML =
+        statRow('Max housing budget', fmt(Math.max(maxHousingBudget,0))) +
+        statRow('Max home price', fmt(0));
+      return;
+    }
+
+    const P = (maxHousingBudget - insuranceMonthly - hoaMonthly + downPayment * k) / (k + t);
+    const homePrice = Math.max(P, 0);
+    const loanAmount = Math.max(homePrice - downPayment, 0);
+    const piPayment = loanAmount * k;
+    const taxPayment = homePrice * t;
+    const totalHousing = piPayment + taxPayment + insuranceMonthly + hoaMonthly;
+
+    titleEl.textContent = 'You can likely afford up to ' + fmt(homePrice) + '.';
+    titleEl.className = 'verdict-title good';
+    subEl.textContent = 'That assumes a ' + fmt(downPayment) + ' down payment, a ' + rate + '% rate over ' + termYears + ' years, and keeping total housing costs at ' + maxDTI + '% of your gross income minus existing debts.';
+
+    if (maxDTI > 43){
+      termNoteEl.className = 'term-note show caution';
+      termNoteEl.textContent = 'A ' + maxDTI + '% back-end DTI is above what many conventional lenders allow (typically capped around 43%). You may need an FHA loan, a larger down payment, or a co-signer to actually qualify at this level.';
+    } else {
+      termNoteEl.className = 'term-note';
+    }
+
+    renderCostBar(piPayment, taxPayment, insuranceMonthly, hoaMonthly);
+
+    statGrid.innerHTML =
+      statRow('Max home price', fmt(homePrice), 'pos') +
+      statRow('Loan amount', fmt(loanAmount)) +
+      statRow('Down payment used', fmt(downPayment)) +
+      statRow('Est. monthly P&amp;I', fmt(piPayment)) +
+      statRow('Est. property tax', fmt(taxPayment)) +
+      statRow('Insurance + HOA', fmt(insuranceMonthly + hoaMonthly)) +
+      statRow('Total housing payment', fmt(totalHousing), null, true);
+  }
+
+  function renderCostBar(pi, tax, insurance, hoa){
+    const total = pi + tax + insurance + hoa;
+    const bar = $('costBar');
+    const legend = $('costBarLegend');
+    if (total <= 0){ bar.innerHTML = ''; legend.innerHTML = ''; return; }
+
+    const segments = [
+      { key: 'pi', cls: 'principal', label: 'Principal & interest', value: pi },
+      { key: 'tax', cls: 'interest', label: 'Property tax', value: tax },
+      { key: 'insurance', cls: 'insurance', label: 'Insurance', value: insurance }
+    ];
+    if (hoa > 0) segments.push({ key: 'hoa', cls: 'hoa', label: 'HOA', value: hoa });
+
+    bar.innerHTML = segments.map(s => {
+      const pct = (s.value / total) * 100;
+      return '<div class="cost-bar-seg ' + s.cls + '" style="width:' + pct + '%">' + (pct > 14 ? Math.round(pct) + '%' : '') + '</div>';
+    }).join('');
+
+    legend.innerHTML = segments.map(s =>
+      '<span><i class="swatch" style="background:var(--' + (s.cls === 'principal' ? 'green' : s.cls === 'interest' ? 'ochre' : s.cls === 'insurance' ? 'slate' : 'red') + ')"></i>' + s.label + '</span>'
+    ).join('');
+  }
+
+  $('calcBtn').addEventListener('click', calculate);
+  $('resultCard').classList.add('show');
+  calculate();
+})();
+</script>
+</body>
+</html>
