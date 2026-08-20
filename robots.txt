@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shouldirefiornot.com/sitemap.xml
+Sitemap: https://www.shouldirefiornot.com/sitemap.xml
