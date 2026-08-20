@@ -234,7 +234,10 @@
     svg.innerHTML = c;
   }
 
-  $('calcBtn').addEventListener('click', calculate);
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('pay-points-calculated');
+  });
   $('resultCard').classList.add('show');
   calculate();
 })();

@@ -289,7 +289,10 @@
     $('matchYearsLabel').textContent = $('yearsLeft').value || '0';
   });
 
-  $('calcBtn').addEventListener('click', calculate);
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('refinance-calculated');
+  });
   calculate();
 })();
 </script>

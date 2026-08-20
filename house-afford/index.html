@@ -231,7 +231,10 @@
     ).join('');
   }
 
-  $('calcBtn').addEventListener('click', calculate);
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('house-afford-calculated');
+  });
   $('resultCard').classList.add('show');
   calculate();
 })();

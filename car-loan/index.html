@@ -472,8 +472,14 @@
     document.querySelectorAll('#termChips .chip').forEach(c => c.classList.toggle('active', c.dataset.months === val));
   });
 
-  $('refiCalcBtn').addEventListener('click', calculate);
-  $('financeCalcBtn').addEventListener('click', calculate);
+  $('refiCalcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('car-loan-refi-calculated');
+  });
+  $('financeCalcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('car-loan-finance-calculated');
+  });
 
   setMode('refi');
 })();
