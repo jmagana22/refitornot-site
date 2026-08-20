@@ -47,6 +47,13 @@
           <span class="suffix">%</span>
         </div>
       </div>
+      <div class="field full">
+        <label for="actualPayment">Actual monthly payment (optional)</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="actualPayment" value="" min="0" step="10" placeholder="Leave blank to estimate from balance, rate & term">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -126,12 +133,15 @@
     const currentRate = parseFloat($('currentRate').value) || 0;
     const newRate = parseFloat($('newRate').value) || 0;
     const closingCosts = parseFloat($('closingCosts').value) || 0;
+    const actualPaymentInput = parseFloat($('actualPayment').value);
+    const usingActual = actualPaymentInput > 0;
 
     const newTermYears = selectedTerm === '30' ? 30 : yearsLeft;
     const oldTermMonths = yearsLeft * 12;
     const newTermMonths = newTermYears * 12;
 
-    const oldPayment = monthlyPayment(balance, currentRate, yearsLeft);
+    const estimatedPayment = monthlyPayment(balance, currentRate, yearsLeft);
+    const oldPayment = usingActual ? actualPaymentInput : estimatedPayment;
     const newPayment = monthlyPayment(balance, newRate, newTermYears);
     const monthlySavings = oldPayment - newPayment;
 
@@ -156,7 +166,7 @@
       termNoteEl.className = 'term-note';
       renderChart(null, closingCosts, newTermMonths);
       statGrid.innerHTML =
-        statRow('Current payment', fmt(oldPayment)) +
+        statRow(usingActual ? 'Current payment (yours)' : 'Current payment (estimated)', fmt(oldPayment)) +
         statRow('New payment', fmt(newPayment)) +
         statRow('Monthly change', fmt(monthlySavings), 'neg') +
         statRow('Breakeven', '—') +
@@ -203,7 +213,7 @@
     renderChart(breakevenMonths, closingCosts, newTermMonths, monthlySavings);
 
     statGrid.innerHTML =
-      statRow('Current payment', fmt(oldPayment)) +
+      statRow(usingActual ? 'Current payment (yours)' : 'Current payment (estimated)', fmt(oldPayment)) +
       statRow('New payment', fmt(newPayment)) +
       statRow('Monthly savings', fmt(monthlySavings), 'pos') +
       statRow('Breakeven month', Math.ceil(breakevenMonths) + ' mo') +
