@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should I Make Extra Mortgage Payments?</title>
+<meta name="description" content="See how much time and interest an extra monthly payment or one-time lump sum actually shaves off your mortgage. Month-by-month amortization, both scenarios side by side.">
+<link rel="canonical" href="https://www.shouldirefiornot.com/extra-payments/">
+<meta property="og:title" content="Should I Make Extra Mortgage Payments?">
+<meta property="og:description" content="See how much time and interest an extra monthly payment or one-time lump sum actually shaves off your mortgage. Month-by-month amortization, both scenarios side by side.">
+<meta property="og:url" content="https://www.shouldirefiornot.com/extra-payments/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Ledger">
+<meta property="og:image" content="https://www.shouldirefiornot.com/shared/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Should I Make Extra Mortgage Payments?">
+<meta name="twitter:description" content="See how much time and interest an extra monthly payment or one-time lump sum actually shaves off your mortgage. Month-by-month amortization, both scenarios side by side.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+  <header>
+    <div class="eyebrow">Extra Payments Ledger</div>
+    <h1>Should I make extra payments?</h1>
+    <p class="sub">Every extra dollar goes straight at principal. Here is exactly how many months that removes from the loan, and what it saves you in interest.</p>
+  </header>
+
+  <div class="card">
+    <div class="section-label">Your loan today</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="balance">Current loan balance</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="balance" value="300000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="rate">Interest rate</label>
+        <div class="input-wrap">
+          <input type="number" id="rate" value="6.5" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="yearsLeft">Years remaining</label>
+        <div class="input-wrap">
+          <input type="number" id="yearsLeft" value="25" min="0" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="monthsLeft">&hellip;plus additional months</label>
+        <div class="input-wrap">
+          <input type="number" id="monthsLeft" value="0" min="0" max="11" step="1">
+          <span class="suffix">mo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">What you would pay extra</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="extraMonthly">Extra every month</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="extraMonthly" value="200" min="0" step="25" placeholder="0">
+        </div>
+      </div>
+      <div class="field">
+        <label for="lumpSum">One-time lump sum</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="lumpSum" value="0" min="0" step="500" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate</button>
+    <p class="assumption">Both extras go to principal, never to interest. The lump sum lands in month one. Leave both at $0 to see your baseline schedule with no acceleration.</p>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-row">
+      <div class="verdict-title" id="verdictTitle"></div>
+    </div>
+    <p class="verdict-sub" id="verdictSub"></p>
+    <div class="term-note" id="termNote"></div>
+
+    <div class="chart-wrap" id="chartWrap">
+      <svg id="chart" viewBox="0 0 520 220" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-legend">
+        <span><i class="swatch" style="background:var(--ochre)"></i>Baseline balance</span>
+        <span><i class="swatch" style="background:var(--green)"></i>With extra payments</span>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice. Confirm that your servicer applies extra payments to principal &mdash; some do not by default. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  function durText(m){
+    if (!isFinite(m)) return '—';
+    const y = Math.floor(m / 12), mm = m % 12;
+    if (y === 0) return mm + ' mo';
+    if (mm === 0) return y + ' yr' + (y === 1 ? '' : 's');
+    return y + ' yr' + (y === 1 ? '' : 's') + ' ' + mm + ' mo';
+  }
+
+  function monthlyPayment(principal, annualRatePct, months){
+    if (months <= 0) return 0;
+    const r = (annualRatePct / 100) / 12;
+    if (r === 0) return principal / months;
+    return principal * r / (1 - Math.pow(1 + r, -months));
+  }
+
+  // Month-by-month amortization. Principal is capped each month so the balance
+  // never drops below zero -- no overpaying in the final month.
+  function simulate(balance, annualRatePct, termMonths, basePayment, extraMonthly, lumpSum){
+    const r = (annualRatePct / 100) / 12;
+    let bal = balance;
+    let totalInterest = 0;
+    let m = 0;
+    const series = [balance];
+    const maxIter = termMonths + 1200;
+    while (bal > 0.005 && m < maxIter){
+      m++;
+      const interest = bal * r;
+      let principal = basePayment - interest + extraMonthly + (m === 1 ? lumpSum : 0);
+      if (principal <= 0) return { months: Infinity, totalInterest: Infinity, series: series, neverPaysOff: true };
+      if (principal > bal) principal = bal;
+      bal -= principal;
+      totalInterest += interest;
+      series.push(bal);
+    }
+    return { months: m, totalInterest: totalInterest, series: series, neverPaysOff: false };
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  function calculate(){
+    const balance = parseFloat($('balance').value) || 0;
+    const rate = parseFloat($('rate').value) || 0;
+    const yearsLeft = parseFloat($('yearsLeft').value) || 0;
+    const monthsLeftExtra = parseFloat($('monthsLeft').value) || 0;
+    const extraMonthly = parseFloat($('extraMonthly').value) || 0;
+    const lumpSum = parseFloat($('lumpSum').value) || 0;
+    const termMonths = Math.round(yearsLeft * 12 + monthsLeftExtra);
+
+    const resultCard = $('resultCard');
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const statGrid = $('statGrid');
+    const termNoteEl = $('termNote');
+    resultCard.classList.add('show');
+
+    // Validation: refuse to compute on a zero or negative balance / term.
+    let invalidMsg = '';
+    if (!(balance > 0)) invalidMsg = 'Enter a loan balance greater than $0.';
+    else if (!(termMonths > 0)) invalidMsg = 'Enter a remaining term of at least one month.';
+
+    if (invalidMsg){
+      titleEl.textContent = 'Check your numbers.';
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = invalidMsg;
+      termNoteEl.className = 'term-note';
+      $('chartWrap').classList.remove('show');
+      statGrid.innerHTML = '';
+      return;
+    }
+
+    const basePayment = monthlyPayment(balance, rate, termMonths);
+    const base = simulate(balance, rate, termMonths, basePayment, 0, 0);
+    const accel = simulate(balance, rate, termMonths, basePayment, extraMonthly, lumpSum);
+
+    const monthsSaved = base.months - accel.months;
+    const interestSaved = base.totalInterest - accel.totalInterest;
+
+    $('chartWrap').classList.add('show');
+
+    if (monthsSaved <= 0 && interestSaved < 0.005){
+      titleEl.textContent = 'No change — this is just your baseline.';
+      titleEl.className = 'verdict-title caution';
+      subEl.textContent = 'You have not added an extra monthly payment or a lump sum, so the schedule below is simply the loan you already have. Add an amount above to see what it does.';
+      termNoteEl.className = 'term-note';
+    } else {
+      titleEl.textContent = 'You would be done ' + durText(monthsSaved) + ' sooner.';
+      titleEl.className = 'verdict-title good';
+      subEl.textContent = 'Paying extra against principal ends the loan in ' + durText(accel.months) +
+        ' instead of ' + durText(base.months) + ', and keeps ' + fmt(interestSaved) + ' of interest in your pocket.';
+      termNoteEl.className = 'term-note show good';
+      termNoteEl.textContent = 'Interest saved is not a return you can spend elsewhere — it is debt you never take on. Weigh it against what the same money would earn invested, and against keeping that cash liquid.';
+    }
+
+    renderChart(base, accel, balance);
+
+    statGrid.innerHTML =
+      statRow('Baseline payment', fmt(basePayment)) +
+      statRow('Extra toward principal', fmt(extraMonthly) + '/mo' + (lumpSum > 0 ? ' + ' + fmt(lumpSum) + ' once' : '')) +
+      statRow('Original payoff', durText(base.months)) +
+      statRow('New payoff', durText(accel.months), monthsSaved > 0 ? 'pos' : '') +
+      statRow('Time shaved off', durText(monthsSaved), monthsSaved > 0 ? 'pos' : '') +
+      statRow('Payments avoided', monthsSaved + ' mo', monthsSaved > 0 ? 'pos' : '') +
+      statRow('Interest — baseline', fmt(base.totalInterest)) +
+      statRow('Interest — with extra', fmt(accel.totalInterest)) +
+      statRow('Total interest saved', fmt(interestSaved), interestSaved > 0 ? 'pos' : '', true);
+
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderChart(base, accel, startBalance){
+    const svg = $('chart');
+    const W = 520, H = 220, padL = 60, padR = 20, padT = 20, padB = 34;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    const maxX = Math.max(base.months, 1);
+    const maxY = startBalance || 1;
+    const xScale = m => padL + (m / maxX) * plotW;
+    const yScale = v => padT + plotH - (v / maxY) * plotH;
+
+    let s = '';
+    s += '<line x1="' + padL + '" y1="' + (padT + plotH) + '" x2="' + (padL + plotW) + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+    s += '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + plotH) + '" stroke="#CDD3C6" stroke-width="1"/>';
+
+    [0, Math.round(maxX / 2), maxX].forEach(m => {
+      s += '<text x="' + xScale(m) + '" y="' + (padT + plotH + 18) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="middle">' + m + 'mo</text>';
+    });
+    s += '<text x="' + (padL - 8) + '" y="' + (padT + plotH + 4) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">$0</text>';
+    s += '<text x="' + (padL - 8) + '" y="' + (padT + 10) + '" font-family="Space Mono, monospace" font-size="10" fill="#5B6B64" text-anchor="end">' + fmt(maxY) + '</text>';
+
+    const pts = series => series.map((v, i) => xScale(i).toFixed(1) + ',' + yScale(v).toFixed(1)).join(' ');
+    s += '<polyline fill="none" stroke="#B9822E" stroke-width="2.5" points="' + pts(base.series) + '"/>';
+    if (isFinite(accel.months)){
+      s += '<polyline fill="none" stroke="#1F6F54" stroke-width="2.5" points="' + pts(accel.series) + '"/>';
+      if (accel.months < base.months){
+        const bx = xScale(accel.months), by = yScale(0);
+        s += '<circle cx="' + bx + '" cy="' + by + '" r="5" fill="#16242F"/>';
+        s += '<line x1="' + bx + '" y1="' + padT + '" x2="' + bx + '" y2="' + by + '" stroke="#16242F" stroke-width="1" stroke-dasharray="3 3"/>';
+        s += '<text x="' + bx + '" y="' + (padT - 6) + '" font-family="Archivo, sans-serif" font-weight="700" font-size="11" fill="#16242F" text-anchor="middle">Paid off, month ' + accel.months + '</text>';
+      }
+    }
+    svg.innerHTML = s;
+  }
+
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('extra-payments-calculated');
+  });
+  calculate();
+})();
+</script>
+</body>
+</html>

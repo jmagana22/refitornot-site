@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELOC vs. Cash-Out Refinance</title>
+<meta name="description" content="Two ways to pull equity out of your home, side by side. Compare the combined monthly payment and the total interest — because they often point in opposite directions.">
+<link rel="canonical" href="https://www.shouldirefiornot.com/heloc-refi/">
+<meta property="og:title" content="HELOC vs. Cash-Out Refinance">
+<meta property="og:description" content="Two ways to pull equity out of your home, side by side. Compare the combined monthly payment and the total interest — because they often point in opposite directions.">
+<meta property="og:url" content="https://www.shouldirefiornot.com/heloc-refi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Ledger">
+<meta property="og:image" content="https://www.shouldirefiornot.com/shared/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HELOC vs. Cash-Out Refinance">
+<meta name="twitter:description" content="Two ways to pull equity out of your home, side by side. Compare the combined monthly payment and the total interest — because they often point in opposite directions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/ledger.css">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="acd2a92d-bb8a-497d-b460-c5d3a36bea3a"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="site-nav">
+    <a href="../index.html" class="site-logo">§ The Ledger</a>
+    <a href="../index.html" class="site-nav-link">&larr; All calculators</a>
+  </div>
+  <header>
+    <div class="eyebrow">Home Equity Ledger</div>
+    <h1>HELOC or cash-out refinance?</h1>
+    <p class="sub">Two ways to turn equity into cash. One keeps the mortgage you already have; the other replaces it. The cheaper monthly payment and the cheaper total interest are frequently not the same option.</p>
+  </header>
+
+  <div class="card">
+    <div class="section-label">Your mortgage today</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="balance">Current mortgage balance</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="balance" value="300000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="mortRate">Current rate</label>
+        <div class="input-wrap">
+          <input type="number" id="mortRate" value="6.5" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="mortMonths">Months remaining</label>
+        <div class="input-wrap">
+          <input type="number" id="mortMonths" value="300" min="0" max="480" step="1">
+          <span class="suffix">mo</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="actualPayment">Actual monthly payment (optional)</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="actualPayment" value="" min="0" step="10" placeholder="Leave blank to estimate from balance, rate &amp; term">
+        </div>
+      </div>
+      <div class="field full">
+        <label for="homeValue">Home value</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="homeValue" value="500000" min="0" step="5000">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Cash you need</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="cashNeeded">Cash to pull out</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="cashNeeded" value="50000" min="0" step="1000">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Option A &mdash; HELOC</div>
+    <div class="field-grid">
+      <div class="field full">
+        <label for="helocRate">HELOC rate</label>
+        <div class="input-wrap">
+          <input type="number" id="helocRate" value="8.5" min="0" max="25" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="drawYears">Draw period</label>
+        <div class="input-wrap">
+          <input type="number" id="drawYears" value="10" min="1" max="20" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="repayYears">Repayment period</label>
+        <div class="input-wrap">
+          <input type="number" id="repayYears" value="20" min="1" max="30" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Option B &mdash; Cash-out refinance</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="refiRate">Cash-out refi rate</label>
+        <div class="input-wrap">
+          <input type="number" id="refiRate" value="7" min="0" max="20" step="0.05">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="refiYears">New term</label>
+        <div class="input-wrap">
+          <input type="number" id="refiYears" value="30" min="1" max="40" step="1">
+          <span class="suffix">yrs</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="closingCosts">Closing costs (rolled into the new loan)</label>
+        <div class="input-wrap">
+          <span class="prefix">$</span>
+          <input type="number" id="closingCosts" value="0" min="0" step="500" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate</button>
+    <p class="assumption">The HELOC is modeled as interest-only on the full draw, then fully amortized over the repayment period &mdash; with no further draws after year one. A cash-out refi replaces your mortgage entirely, so its clock restarts at the new term.</p>
+  </div>
+
+  <div class="card" id="resultCard">
+    <div class="verdict-row">
+      <div class="verdict-title" id="verdictTitle"></div>
+    </div>
+    <p class="verdict-sub" id="verdictSub"></p>
+    <div class="term-note" id="termNote"></div>
+    <div class="term-note" id="interestNote"></div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <footer>This is a simplified estimate, not financial advice. HELOC rates are usually variable and can move after closing &mdash; the fixed rate modeled here is a planning assumption, not a promise. <br>Not a licensed financial advisor. <a href="../privacy/index.html">Privacy Policy</a></footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+
+  function monthlyPayment(principal, annualRatePct, months){
+    if (months <= 0) return 0;
+    const r = (annualRatePct / 100) / 12;
+    if (r === 0) return principal / months;
+    return principal * r / (1 - Math.pow(1 + r, -months));
+  }
+
+  function statRow(label, value, cls, full){
+    return '<div class="stat' + (full ? ' full' : '') + '"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  function calculate(){
+    const balance      = parseFloat($('balance').value) || 0;
+    const mortRate     = parseFloat($('mortRate').value) || 0;
+    const mortMonths   = Math.round(parseFloat($('mortMonths').value) || 0);
+    const homeValue    = parseFloat($('homeValue').value) || 0;
+    const cashNeeded   = parseFloat($('cashNeeded').value) || 0;
+    const helocRate    = parseFloat($('helocRate').value) || 0;
+    const drawYears    = parseFloat($('drawYears').value) || 0;
+    const repayYears   = parseFloat($('repayYears').value) || 0;
+    const refiRate     = parseFloat($('refiRate').value) || 0;
+    const refiYears    = parseFloat($('refiYears').value) || 0;
+    const closingCosts = parseFloat($('closingCosts').value) || 0;
+
+    const actualPaymentInput = parseFloat($('actualPayment').value);
+    const usingActual = actualPaymentInput > 0;
+
+    const resultCard = $('resultCard');
+    const titleEl = $('verdictTitle');
+    const subEl = $('verdictSub');
+    const statGrid = $('statGrid');
+    const termNoteEl = $('termNote');
+    const interestNoteEl = $('interestNote');
+    resultCard.classList.add('show');
+
+    // Validation: refuse to compute rather than printing a meaningless comparison.
+    let invalidMsg = '';
+    if (!(balance > 0))     invalidMsg = 'Enter a current mortgage balance greater than $0.';
+    else if (!(mortMonths > 0))  invalidMsg = 'Enter a remaining mortgage term of at least one month.';
+    else if (!(cashNeeded > 0))  invalidMsg = 'Enter how much cash you need. With $0 to pull out there is nothing to compare — neither option does anything.';
+    else if (!(drawYears > 0))   invalidMsg = 'Enter a HELOC draw period of at least one year.';
+    else if (!(repayYears > 0))  invalidMsg = 'Enter a HELOC repayment period of at least one year.';
+    else if (!(refiYears > 0))   invalidMsg = 'Enter a cash-out refi term of at least one year.';
+
+    if (invalidMsg){
+      titleEl.textContent = 'Check your numbers.';
+      titleEl.className = 'verdict-title bad';
+      subEl.textContent = invalidMsg;
+      termNoteEl.className = 'term-note';
+      interestNoteEl.className = 'term-note';
+      statGrid.innerHTML = '';
+      return;
+    }
+
+    // --- shared baseline: the mortgage you already have ---
+    const estimatedPayment = monthlyPayment(balance, mortRate, mortMonths);
+    const currentPayment   = usingActual ? actualPaymentInput : estimatedPayment;
+    const mortgageInterestRemaining = (currentPayment * mortMonths) - balance;
+
+    // --- Option A: HELOC on top of the existing mortgage ---
+    const helocMonthlyRate = (helocRate / 100) / 12;
+    const drawMonths  = Math.round(drawYears * 12);
+    const repayMonths = Math.round(repayYears * 12);
+
+    const helocDrawPayment   = cashNeeded * helocMonthlyRate;          // interest-only
+    const helocDrawInterest  = helocDrawPayment * drawMonths;
+    const helocRepayPayment  = monthlyPayment(cashNeeded, helocRate, repayMonths);
+    const helocRepayInterest = (helocRepayPayment * repayMonths) - cashNeeded;
+    const helocTotalInterest = helocDrawInterest + helocRepayInterest;
+
+    const comboDraw  = currentPayment + helocDrawPayment;
+    const comboRepay = currentPayment + helocRepayPayment;
+    const optionATotalInterest = mortgageInterestRemaining + helocTotalInterest;
+
+    // --- Option B: cash-out refi replaces the mortgage ---
+    const newLoanAmount = balance + cashNeeded + closingCosts;
+    const refiMonths    = Math.round(refiYears * 12);
+    const refiPayment   = monthlyPayment(newLoanAmount, refiRate, refiMonths);
+    const optionBTotalInterest = (refiPayment * refiMonths) - newLoanAmount;
+
+    const equity = homeValue > 0 ? homeValue - balance : null;
+    const refiLtv = homeValue > 0 ? (newLoanAmount / homeValue) * 100 : null;
+
+    // --- the two comparisons, which can disagree ---
+    const paymentWinnerDraw = comboDraw < refiPayment ? 'HELOC' : (comboDraw > refiPayment ? 'the refi' : 'a tie');
+    const interestWinner    = optionATotalInterest < optionBTotalInterest ? 'HELOC'
+                            : (optionATotalInterest > optionBTotalInterest ? 'the refi' : 'a tie');
+    const paymentGapDraw = Math.abs(comboDraw - refiPayment);
+    const interestGap    = Math.abs(optionATotalInterest - optionBTotalInterest);
+    const agree = paymentWinnerDraw === interestWinner;
+
+    if (agree && paymentWinnerDraw !== 'a tie'){
+      titleEl.textContent = paymentWinnerDraw === 'HELOC'
+        ? 'The HELOC wins on both counts.'
+        : 'The cash-out refi wins on both counts.';
+      titleEl.className = 'verdict-title good';
+      subEl.textContent = 'Same answer either way you look at it — ' + paymentWinnerDraw +
+        ' costs less per month during the draw period and less in total interest. That is the rare easy case.';
+    } else if (paymentWinnerDraw === 'a tie' || interestWinner === 'a tie'){
+      titleEl.textContent = 'Effectively a wash.';
+      titleEl.className = 'verdict-title caution';
+      subEl.textContent = 'These two options land close enough that the decision comes down to terms, fees, and how variable the HELOC rate turns out to be — not to the math below.';
+    } else {
+      titleEl.textContent = 'They split. Pick your priority.';
+      titleEl.className = 'verdict-title caution';
+      subEl.textContent = 'Lower monthly payment and lower total interest point at different options here. Neither is wrong — it depends on whether you need cash flow now or the smaller lifetime cost.';
+    }
+
+    // Both directions get stated plainly, never collapsed into one "winner".
+    termNoteEl.className = 'term-note show ' + (paymentWinnerDraw === 'HELOC' ? 'good' : 'caution');
+    termNoteEl.textContent = 'Monthly payment: ' + paymentWinnerDraw + ' is lower during the draw period, by ' +
+      fmt(paymentGapDraw) + '/mo (' + fmt(comboDraw) + ' combined vs ' + fmt(refiPayment) + '). Once the HELOC enters repayment the combined payment rises to ' +
+      fmt(comboRepay) + '/mo.';
+
+    interestNoteEl.className = 'term-note show ' + (interestWinner === 'HELOC' ? 'good' : 'caution');
+    interestNoteEl.textContent = 'Total interest: ' + interestWinner + ' is cheaper by ' + fmt(interestGap) +
+      ' over the full comparison horizon (' + fmt(optionATotalInterest) + ' for the HELOC path vs ' +
+      fmt(optionBTotalInterest) + ' for the refi). The refi restarts the clock on your whole balance, which is usually what drives this number.';
+
+    statGrid.innerHTML =
+      statRow(usingActual ? 'Current payment (yours)' : 'Current payment (estimated)', fmt(currentPayment)) +
+      statRow('Home equity today', equity === null ? '—' : fmt(equity)) +
+      statRow('HELOC — draw payment', fmt(helocDrawPayment)) +
+      statRow('HELOC — repayment payment', fmt(helocRepayPayment)) +
+      statRow('Combined monthly, draw phase', fmt(comboDraw), comboDraw < refiPayment ? 'pos' : 'neg') +
+      statRow('Combined monthly, repay phase', fmt(comboRepay), comboRepay < refiPayment ? 'pos' : 'neg') +
+      statRow('Refi — new loan amount', fmt(newLoanAmount)) +
+      statRow('Refi — single payment', fmt(refiPayment), refiPayment < comboDraw ? 'pos' : 'neg') +
+      statRow('Refi loan-to-value', refiLtv === null ? '—' : refiLtv.toFixed(1) + '%') +
+      statRow('Closing costs rolled in', closingCosts > 0 ? fmt(closingCosts) : 'None') +
+      statRow('Total interest — HELOC path', fmt(optionATotalInterest), optionATotalInterest < optionBTotalInterest ? 'pos' : 'neg') +
+      statRow('Total interest — refi path', fmt(optionBTotalInterest), optionBTotalInterest < optionATotalInterest ? 'pos' : 'neg');
+
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    if (window.umami) umami.track('heloc-refi-calculated');
+  });
+  calculate();
+})();
+</script>
+</body>
+</html>

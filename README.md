@@ -13,9 +13,13 @@ backend to work.
 ├── car-loan/index.html     ← Car Loan Ledger (refi + new purchase)
 ├── pay-points/index.html   ← Should I Pay Points?
 ├── house-afford/index.html ← How Much House Can I Afford?
+├── extra-payments/index.html ← Should I Make Extra Payments?
+├── heloc-refi/index.html   ← HELOC vs. Cash-Out Refinance
 ├── privacy/index.html      ← privacy policy, linked from every footer
-└── shared/
-    └── ledger.css           ← the single shared stylesheet
+├── shared/
+│   ├── ledger.css           ← the single shared stylesheet
+│   └── og-image.png         ← social card, referenced by every page
+└── tests/                   ← dev-only, never shipped (see Tests below)
 ```
 
 ## Conventions — read before adding a tool
@@ -73,8 +77,6 @@ existing tools to confirm nothing regressed.
 
 ## Roadmap (coming-soon cards on the hub)
 
-- Should I Make Extra Payments?
-- HELOC vs. Cash-Out Refinance
 - Rent vs. Buy
 - Debt Consolidation Calculator
 - Should I Lease or Buy?
@@ -83,8 +85,44 @@ existing tools to confirm nothing regressed.
 ## Analytics
 
 Umami Cloud, cookieless, one `<script>` tag per page (already present in
-all six `index.html` files, before `</head>`). Free tier: 100k
+all eight `index.html` files, before `</head>`). Free tier: 100k
 events/month, one website, 6-month retention.
+
+## Tests
+
+`tests/` holds the verification harness. **It is dev-only and does not
+change the "no build step" rule above** — the site still ships as plain
+files, and nothing in `tests/` is referenced by any page.
+
+```
+tests/
+├── extra-payments.math.js  ← reference math, standalone Node, no deps
+├── heloc-refi.math.js      ← reference math, standalone Node, no deps
+├── scenarios.js            ← shared input fixtures for both of the above
+├── run-math.js             ← prints reference output for every scenario
+├── dom.test.js             ← loads the real pages in jsdom, asserts the
+│                             rendered output matches the reference math
+└── link-check.js           ← resolves every internal link, checks the hub
+                              tool cards, sitemap.xml and SEO/OG heads
+```
+
+Run them:
+
+```
+node tests/run-math.js                  # no dependencies
+npm install --no-save jsdom             # dev only, gitignored
+node tests/dom.test.js
+node tests/link-check.js
+```
+
+`--no-save` is deliberate: there is no `package.json` and there should
+not be one. jsdom is a local convenience for running the tests, not a
+project dependency.
+
+When you add a tool, add its scenarios to `tests/scenarios.js` and a
+reference math module beside the existing two. The math modules are the
+source of truth — the inline page JS must reproduce them exactly, and
+`dom.test.js` is what proves it.
 
 ## Privacy policy
 
