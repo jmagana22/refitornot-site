@@ -16,6 +16,7 @@ backend to work.
 ├── extra-payments/index.html ← Should I Make Extra Payments?
 ├── heloc-refi/index.html   ← HELOC vs. Cash-Out Refinance
 ├── privacy/index.html      ← privacy policy, linked from every footer
+├── terms/index.html        ← terms of service, linked from every footer
 ├── shared/
 │   ├── ledger.css           ← the single shared stylesheet
 │   └── og-image.png         ← social card, referenced by every page
@@ -72,8 +73,10 @@ existing tools to confirm nothing regressed.
    inventing new ones.
 5. Add a card for it on the hub (`index.html`), and remove/replace its
    "coming soon" placeholder if one exists.
-6. Add the analytics tag (see below) and a footer link to
-   `/privacy/index.html`.
+6. Add the analytics tag (see below) and footer links to
+   `/privacy/index.html` and `/terms/index.html`.
+7. Add a `<section class="faq">` between the result card and the footer
+   (see **FAQ blocks** below).
 
 ## Roadmap (coming-soon cards on the hub)
 
@@ -85,7 +88,7 @@ existing tools to confirm nothing regressed.
 ## Analytics
 
 Umami Cloud, cookieless, one `<script>` tag per page (already present in
-all eight `index.html` files, before `</head>`). Free tier: 100k
+all nine `index.html` files, before `</head>`). Free tier: 100k
 events/month, one website, 6-month retention.
 
 ## Tests
@@ -103,7 +106,8 @@ tests/
 ├── dom.test.js             ← loads the real pages in jsdom, asserts the
 │                             rendered output matches the reference math
 └── link-check.js           ← resolves every internal link, checks the hub
-                              tool cards, sitemap.xml and SEO/OG heads
+                              tool cards, sitemap.xml, SEO/OG heads, the
+                              legal pages and every FAQ block
 ```
 
 Run them:
@@ -124,8 +128,33 @@ reference math module beside the existing two. The math modules are the
 source of truth — the inline page JS must reproduce them exactly, and
 `dom.test.js` is what proves it.
 
-## Privacy policy
+## Legal pages
 
-`/privacy/index.html` is linked from every page's footer. It reflects
-what the site actually does — if analytics, ads, or affiliate links
-change, update that page in the same commit.
+`/privacy/index.html` and `/terms/index.html` are linked from every
+page's footer. Privacy reflects what the site actually does — if
+analytics, ads, or affiliate links change, update that page in the same
+commit. Both pages share the `.legal` / `.toc` / `.short-version` inline
+style block; keep them in sync when either changes.
+
+## FAQ blocks
+
+Every calculator carries a short FAQ between its result card and its
+footer:
+
+```html
+<section class="faq">
+  <h2 class="section-label">Common questions</h2>
+  <details>
+    <summary>Question?</summary>
+    <p>Answer.</p>
+  </details>
+</section>
+```
+
+Native `<details>`/`<summary>` — no JS, consistent with the no-build-step
+rule. `.faq` is styled once in `shared/ledger.css`; don't re-declare it
+inline on a page. **Answers must describe what the calculator actually
+does.** Several pages have dedicated inputs for things a generic FAQ
+would claim are excluded (car-loan has a sales tax field, house-afford
+has tax/insurance/HOA fields), and `link-check.js` cannot catch a
+plausible-but-wrong answer — re-read the fields before writing one.
