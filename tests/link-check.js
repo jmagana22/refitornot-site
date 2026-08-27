@@ -308,6 +308,48 @@ console.log('\n--- .faq lives in shared/ledger.css ---');
   console.log('  .faq defined once in the shared stylesheet, no inline duplicates');
 }
 
+// --- 10. the privacy policy matches what the pages actually load ---
+// This page went stale once: it claimed no analytics while Umami shipped on
+// every page. Assert the policy against the markup rather than trusting prose.
+console.log('\n--- privacy policy matches reality ---');
+{
+  const privacy = fs.readFileSync(path.join(ROOT, 'privacy', 'index.html'), 'utf8');
+  const policyText = new JSDOM(privacy).window.document.querySelector('.legal').textContent;
+
+  const loadsUmami = pages.filter(p => /cloud\.umami\.is/.test(fs.readFileSync(path.join(ROOT, p), 'utf8')));
+  const adCode = pages.filter(p => /adsbygoogle|googlesyndication|pagead2/.test(fs.readFileSync(path.join(ROOT, p), 'utf8')));
+
+  if (loadsUmami.length){
+    assert(/Umami/i.test(policyText),
+           'pages load Umami, so the policy must name it',
+           loadsUmami.length + ' pages load cloud.umami.is');
+    assert(!/does not currently use any analytics|no analytics/i.test(policyText),
+           'policy does not still claim the site has no analytics');
+    assert(loadsUmami.length === pages.length,
+           'every page carries the analytics tag', loadsUmami.length + '/' + pages.length);
+  } else {
+    assert(!/Umami/i.test(policyText), 'no page loads Umami, so the policy should not name it');
+  }
+
+  // the policy claims no ad code runs; that claim has to stay true
+  assert(adCode.length === 0,
+         'no page ships ad network code while the policy says none does',
+         'found in: ' + adCode.join(', '));
+
+  // the policy claims no cookies and no web storage in the calculators
+  const storage = pages.filter(p => /localStorage|sessionStorage|document\.cookie/.test(fs.readFileSync(path.join(ROOT, p), 'utf8')));
+  assert(storage.length === 0,
+         'no page uses cookies or web storage while the policy says none does',
+         'found in: ' + storage.join(', '));
+
+  // the tool list in the policy should cover every calculator that exists
+  for (const [slug, phrase] of [['extra-payments', 'extra mortgage payment'], ['heloc-refi', 'HELOC']]){
+    assert(new RegExp(phrase, 'i').test(policyText),
+           'policy tool list mentions ' + slug + ' ("' + phrase + '")');
+  }
+  console.log('  checked the policy against ' + pages.length + ' pages: analytics, ad code, storage, tool list');
+}
+
 console.log('\n==================================================');
 console.log(' Link/SEO assertions passed: ' + passed + ', failed: ' + failed);
 if (failed){

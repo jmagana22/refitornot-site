@@ -98,10 +98,10 @@
     <div class="eyebrow">Privacy Policy</div>
     <h1>Privacy Policy</h1>
   </header>
-  <p class="updated">Last updated: August 12, 2026</p>
+  <p class="updated">Last updated: August 27, 2026</p>
 
   <div class="short-version">
-    <p>The short version: every calculator on this site runs entirely in your browser. The numbers you type in never get sent anywhere, saved anywhere, or seen by us. There's nothing to leak because there's nothing collected.</p>
+    <p>The short version: every calculator on this site runs entirely in your browser. The numbers you type in never get sent anywhere, saved anywhere, or seen by us. We do count page views with a cookieless analytics tool, but it never sees a single figure you enter.</p>
   </div>
 
   <div class="toc">
@@ -120,23 +120,30 @@
   </div>
 
   <h2 id="what-this-site-does">What this site does</h2>
-  <p>The Ledger is a small collection of financial calculators — mortgage refinancing, auto loans, mortgage points, and home affordability. Each one takes the numbers you enter, runs the math in your browser using JavaScript, and shows you the result. No part of that calculation is sent to a server. There is no server involved in the calculation at all.</p>
+  <p>The Ledger is a small collection of financial calculators — mortgage refinancing, auto loans, mortgage points, home affordability, extra mortgage payments, and HELOC/cash-out refinance comparisons. Each one takes the numbers you enter, runs the math in your browser using JavaScript, and shows you the result. No part of that calculation is sent to a server. There is no server involved in the calculation at all.</p>
 
   <h2 id="what-we-collect">What we collect</h2>
   <p>Directly, from the calculators themselves: nothing. We don't ask for your name, email, or any contact information to use any tool on this site. Loan balances, income figures, interest rates — none of it is transmitted, logged, or stored by us in any form.</p>
   <p>Like virtually any website, the server that hosts these pages (and any content-delivery network in front of it) automatically logs basic technical information for every visit — your IP address, browser type, and the page requested — as a standard part of serving web pages. This is infrastructure-level logging, not something this site collects or uses for any purpose beyond keeping the site running.</p>
+  <p>Separately, this site does record anonymous, aggregate traffic statistics — which pages get visited and when a calculator is run. That is described in full under <a href="#analytics">Analytics</a> below. It contains no personal information and none of the numbers you type into a calculator.</p>
 
   <h2 id="cookies">Cookies &amp; local storage</h2>
-  <p>This site does not set cookies. It does not use browser local storage or session storage. Nothing persists between visits — reload any calculator and it starts fresh, because there was never anything to remember.</p>
+  <p>This site does not set cookies. The analytics tool it uses is deliberately cookieless, and the calculators themselves don't use browser local storage or session storage. Nothing persists between visits — reload any calculator and it starts fresh, because there was never anything to remember. If advertising is added later, that will change, and this section will say so before it goes live.</p>
 
   <h2 id="third-party">Third-party services</h2>
   <p>Pages on this site load typefaces from Google Fonts. When your browser fetches those font files, it makes a direct request to Google's servers, which — like any web request — includes your IP address. We don't control this exchange or receive any data from it ourselves. Google's own privacy policy governs what happens on their end.</p>
+  <p>Every page also loads a small analytics script from Umami Cloud, which is covered in detail under <a href="#analytics">Analytics</a>. Those are the only two third-party services this site loads.</p>
 
   <h2 id="advertising">Advertising &amp; affiliate links</h2>
-  <p>This site does not currently display ads or contain affiliate links. If that changes, this section will be updated with specifics — which network, what they track, and how to opt out where applicable. Any outbound link to a lender, product, or service takes you to a site outside our control, governed by that site's own privacy policy, not this one.</p>
+  <p>As of the date above, this site displays no advertisements and contains no affiliate links. No ad network code runs on any page.</p>
+  <p>We are, however, working toward displaying ads — the Terms of Service permit it, and third-party advertising is the intended way to keep these tools free. If and when an ad network such as Google AdSense is enabled here, it will very likely set cookies or use similar device identifiers to serve and measure ads, including personalized ads based on your prior browsing. That is a real change from how the site behaves today, so this section and the cookie section above will be rewritten with the specifics — which network, what it collects, and how to opt out — before any ad code goes live, not after.</p>
+  <p>Any outbound link to a lender, product, or service takes you to a site outside our control, governed by that site's own privacy policy, not this one.</p>
 
   <h2 id="analytics">Analytics</h2>
-  <p>This site does not currently use any analytics or visitor-tracking tool. If one is added, this section will name the specific tool, describe what it measures, and explain any opt-out available.</p>
+  <p>This site uses <a href="https://umami.is/" rel="noopener">Umami Cloud</a> to count traffic. It is a privacy-focused, cookieless analytics tool: it sets no cookies, writes nothing to your browser's storage, assigns you no persistent identifier, and does not follow you to other websites.</p>
+  <p>What it records is a page view — which page was loaded, the referring site, and coarse details derived from your request such as browser, operating system, device type, and country. It also records a named event when you press a Calculate button, so we can see which tools actually get used. That event carries the name of the calculator and nothing else.</p>
+  <p>To be explicit about the part that matters: the analytics never receive the values you type in. Loan balances, incomes, rates, home values, and every result computed from them stay in your browser and are not part of any event we send.</p>
+  <p>Umami does not collect personal information and the statistics we see are aggregate — visitor counts and page totals, not individuals. If you would rather not be counted at all, any content blocker or browser privacy mode that blocks analytics scripts will stop it, and the calculators keep working normally with the script blocked.</p>
 
   <h2 id="children">Children's privacy</h2>
   <p>This site is not directed at children under 13, and we do not knowingly collect information from anyone in that age group — which is straightforward here, since we don't collect personal information from any visitor, of any age.</p>
