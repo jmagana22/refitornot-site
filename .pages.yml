@@ -1,0 +1,25 @@
+
+content:
+  - name: homepage
+    label: Home Page
+    type: file
+    path: index.html
+    format: code
+    operations:
+      delete: false
+
+  - name: privacy
+    label: Privacy Policy
+    type: file
+    path: privacy/index.html
+    format: code
+    operations:
+      delete: false
+
+  - name: terms
+    label: Terms of Service
+    type: file
+    path: terms/index.html
+    format: code
+    operations:
+      delete: false
