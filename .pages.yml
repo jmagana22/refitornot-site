@@ -23,3 +23,22 @@ content:
     format: code
     operations:
       delete: false
+
+  - name: homepage-content
+    label: Homepage Content
+    type: file
+    path: content/homepage.json
+    format: json
+    fields:
+      - name: headline
+        label: Main Headline
+        type: string
+      - name: subtitle
+        label: Introduction
+        type: text
+      - name: seo_title
+        label: SEO Page Title
+        type: string
+      - name: seo_description
+        label: SEO Description
+        type: text
